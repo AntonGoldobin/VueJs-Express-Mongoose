@@ -1,16 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
 const app = express();
 const jsonParser = express.json();
+const User = require("./db/models/Users")
 
-const userScheme = new Schema({
-    name: String,
-    age: Number,
-})
-const User = mongoose.model("User", userScheme);
-
-mongoose.connect("mongodb://localhost:27017/usersdb", { useNewUrlParser: true }, function(err){
+mongoose.connect("mongodb+srv://bloodsacrifice:FgupgpybSuH8a79J@cluster0-lyyb5.mongodb.net/test?retryWrites=true&w=majority", { useNewUrlParser: true }, function(err){
     if(err) return console.log(err);
     app.listen(3001, function(){
         console.log("Сервер ожидает подключения...");
@@ -56,11 +50,3 @@ app.post("/users", jsonParser, function(req, res){
     });
 })
 
-app.get("/", function(request, response){
-    response.send('{\n' +
-        '  "items": [\n' +
-        '    { "id": 1, "name": "Яблоки",  "price": "$2" },\n' +
-        '    { "id": 2, "name": "Персики", "price": "$5" }\n' +
-        '  ] \n' +
-        '}')
-})
