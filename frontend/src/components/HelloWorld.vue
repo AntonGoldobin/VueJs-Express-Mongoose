@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     getData(){
-      const url = 'http://localhost:3001/users'
+      const url = 'http://localhost:3000/users'
       axios.get(url)
         .then(response => {
           this.users = response.data
@@ -38,7 +38,8 @@ export default {
             name: this.name,
             age: this.age,
         }
-      const url = 'http://localhost:3001/users'
+     // const url = process.env.BASE_URL ? process.env.BASE_URL + '/users' : 'http://localhost:3000/users'
+      const url = 'http://localhost:3000/users'
       axios.post(url, data )
         .then((response) => {
           console.log(response);
