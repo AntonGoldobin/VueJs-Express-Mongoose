@@ -7,8 +7,15 @@ var _ = require('lodash');
 
 const thatBoobsId = '@thatBoobs'
 
+let isLoaded = false
+
+function isLoadedFalse(){
+  console.log('yay')
+  isLoaded = false
+}
 
 function startBot(){
+
   const boobsBot = new Telegraf(token)
   boobsBot.command('clearData', (ctx) => {
     clearData()
@@ -16,14 +23,23 @@ function startBot(){
   })
   boobsBot.command('start', (ctx) => {
     // GET the data from Reddit API
-    postContent(ctx)
+
+    //if loading process is continued, do nothing
+    setInterval(postContent, 1000 * 60 * 60 * 6, ctx)
   })
 
   boobsBot.launch()
 
   async function postContent(ctx){
+    console.log(isLoaded)
+    if(isLoaded === true){
+      return
+    }
+
+    isLoaded = true
+
     await console.log('start again')
-    await axios.get(`https://reddit.com/r/boobs/top.json?limit=5`)
+    await axios.get(`https://reddit.com/r/boobs/top.json?limit=100`)
       .then(res => {
         // data recieved from Reddit
         const data = res.data.data;
@@ -32,9 +48,6 @@ function startBot(){
         if (data.children.length < 1){
           return ctx.reply('The subreddit couldn\'t be found.');
         }
-
-        ctx.reply('Поняль ;)');
-
         postUnicPosts(data, ctx)
       })
 
@@ -68,13 +81,16 @@ function startBot(){
         // mix ids and get only unique
         const uniqIds = _.difference(dataIds, boobsIds)
         // return all uniq posts from reddit
-        return uniqIds.map(id => data.children.find(post => post.data.id === id))
+        const uniqPosts = uniqIds.map(id => data.children.find(post => post.data.id === id))
+        return uniqPosts
       })
     return uniqPosts
   }
   function sendUniqPosts(ctx, uniqPosts) {
     // post image every 5 seconds
-    uniqPosts.forEach( (post, index) => setTimeout(sendPhotoOrGif, (index + 1) * 1000 * 5,post.data.url, ctx, post) )
+    uniqPosts.forEach( async (post, index) => {
+      await setTimeout(sendPhotoOrGif, (index + 1) * 1000 * 60 * 10 ,post.data.url, ctx, post)
+    })
   }
   function sendPhotoOrGif(postUrl, ctx, post) {
     if(postUrl.includes('gfycat')) {
