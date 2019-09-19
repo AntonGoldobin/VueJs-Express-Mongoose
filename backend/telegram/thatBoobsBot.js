@@ -23,9 +23,12 @@ function startBot(){
   })
   boobsBot.command('start', (ctx) => {
     // GET the data from Reddit API
-
+    ctx.reply('Starting...')
     //if loading process is continued, do nothing
-    setInterval(postContent, 1000 * 60 * 60 * 6, ctx)
+    postContent(ctx).then();
+
+    //starting bot every day
+    setInterval(postContent, 1000 * 60 * 60 * 24, ctx)
   })
 
   boobsBot.launch()
@@ -48,7 +51,7 @@ function startBot(){
         if (data.children.length < 1){
           return ctx.reply('The subreddit couldn\'t be found.');
         }
-        postUnicPosts(data, ctx)
+        postUnicPosts(data, ctx).then();
       })
 
       // if there's any error in request
@@ -70,9 +73,11 @@ function startBot(){
   }
 
   async function checkUniqAndReturn(data){
-    const url = 'https://sky-tanuki.herokuapp.com' + '/thatBoobs'
+    const herokuUrl = 'https://sky-tanuki.herokuapp.com' + '/thatBoobs'
+    const localUrl = 'http://localhost:3000/thatBoobs'
     //get ids from db
-    const uniqPosts = await axios.get(url)
+    //TODO change url for local server
+    const uniqPosts = await axios.get(herokuUrl)
       .then( resDB => {
         //get ids from new reddit posts
         const dataIds = data.children.map(post => post.data.id)
@@ -84,6 +89,9 @@ function startBot(){
         const uniqPosts = uniqIds.map(id => data.children.find(post => post.data.id === id))
         return uniqPosts
       })
+      .catch(error => {
+        console.log(error.response)
+      });
     return uniqPosts
   }
   function sendUniqPosts(ctx, uniqPosts) {
